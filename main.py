@@ -17,6 +17,7 @@ def unpack_dds(file_name):
 
     subprocess.Popen([RAWTEX, output_path, 'BC7', '0x80']).wait()
     os.remove(output_path)
+    print('Unpacked:', str(input_path))
 
 def pack_dds(file_name):
 
@@ -38,21 +39,30 @@ def pack_dds(file_name):
 
     output_path = Path(os.path.join(input_path.parent, input_path.stem + ".texture"))
     open(output_path, "wb").write(out_data)
+    print('Packed:', str(input_path))
 
-if __name__ == "__main__":
+def read_input():
+    files = sys.argv[1:]
 
-    file = sys.argv[-1]
+    files = list(filter(lambda x: x.endswith(".dds") or x.endswith(".texture"), files))
 
-    if not file.endswith('.dds') and not file.endswith('.texture'):
+    if not len(files):
         print('Input must be a file path or file name ending in ".dds" or ".texture"')
         print('Tip: Drag and drop the file into the executable.')
         input()
         quit(1)
 
-    if file.endswith('.dds'):
-        pack_dds(file)
-        quit()
+    return files
 
-    unpack_dds(file)
+if __name__ == "__main__":
 
+    files = read_input()
 
+    for file in files:
+        if file.endswith('.dds'):
+            pack_dds(file)
+            continue
+
+        if file.endswith('.texture'):
+            unpack_dds(file)
+            continue
