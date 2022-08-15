@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import sys
 import shutil
+import subprocess
 
 CWD = getattr(sys, '_MEIPASS', os.getcwd())
 
@@ -14,8 +15,7 @@ def unpack_dds(file_name):
 
     shutil.copyfile(str(input_path), output_path)
 
-    os.system(" ".join([RAWTEX, output_path, 'BC7', '0x80']))
-
+    subprocess.Popen([RAWTEX, output_path, 'BC7', '0x80']).wait()
     os.remove(output_path)
 
 def pack_dds(file_name):
