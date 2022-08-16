@@ -8,6 +8,9 @@ CWD = getattr(sys, '_MEIPASS', os.getcwd())
 
 RAWTEX = os.path.join(CWD, 'bin/RawtexCmd.exe')
 
+def has_header(raw):
+    return 'Texture Built File' in str(raw[:128])
+
 def unpack_dds(file_name):
 
     input_path = Path(file_name)
@@ -15,16 +18,17 @@ def unpack_dds(file_name):
 
     shutil.copyfile(str(input_path), output_path)
 
-    subprocess.Popen([RAWTEX, output_path, 'BC7', '0x80']).wait()
+    raw = open(output_path, 'rb').read()
+
+    offset = '0x80' if has_header(raw) else '0x00'
+
+    subprocess.Popen([RAWTEX, output_path, 'BC7', offset]).wait()
     os.remove(output_path)
     print('Unpacked:', str(input_path))
 
 def pack_dds(file_name):
 
     input_path = Path(file_name)
-
-    raw = open(input_path, "rb").read()
-
     original_file_path = str(input_path).replace("_MOD.dds", ".texture")
 
     if not os.path.isfile(original_file_path):
@@ -32,10 +36,14 @@ def pack_dds(file_name):
         input()
         quit(1)
 
+    raw = open(input_path, "rb").read()
+    raw = raw[148:]
+
     original = open(original_file_path, "rb").read()
 
-    raw = raw[148:]
-    out_data = (original[:128] + raw)[:len(original)]
+    header = original[:128] if has_header(original) else b''
+
+    out_data = (header + raw)[:len(original)]
 
     output_path = Path(os.path.join(input_path.parent, input_path.stem + ".texture"))
     open(output_path, "wb").write(out_data)
