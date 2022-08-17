@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import subprocess
+import traceback as tb
 
 CWD = getattr(sys, '_MEIPASS', os.getcwd())
 
@@ -62,7 +63,7 @@ def read_input():
 
     return files
 
-if __name__ == "__main__":
+def main():
 
     files = read_input()
 
@@ -74,3 +75,12 @@ if __name__ == "__main__":
         if file.endswith('.texture'):
             unpack_dds(file)
             continue
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        file = open('ErrorLog.txt', 'w')
+        tb.print_exc(file=file)
+        file.close()
+        os.system('ErrorLog.txt')
